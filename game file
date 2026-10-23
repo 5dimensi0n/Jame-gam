@@ -1,0 +1,127 @@
+
+import pygame
+from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, QUIT, K_LSHIFT
+import random
+
+pygame.init()
+
+window = pygame.display.set_mode((500, 500))
+pygame.display.set_caption('thing')
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y, mass):
+        super().__init__()
+        self.image = pygame.transform.scale(pygame.image.load('secco.png'), (mass, mass))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x,y)
+        self.accel = 2
+        self.maxspeed = 20
+        self.friction = 0.9
+        self.speedX = 0
+        self.speedY = 0
+        self.mass = mass
+
+    def update(self, keys_pressed, mass):
+        if keys_pressed[K_LEFT] and self.rect.left > 0:
+            self.speedX -= self.accel
+            self.image = pygame.transform.scale(pygame.image.load('secco.png'), (mass, mass))
+     
+        if keys_pressed[K_RIGHT] and self.rect.right < 500:
+            self.speedX += self.accel
+            self.image = pygame.transform.scale(pygame.image.load('secco.png'), (mass, mass))
+           
+        if keys_pressed[K_UP] and self.rect.top > 0:
+            self.speedY-= self.accel
+            self.image = pygame.transform.scale(pygame.image.load('secco.png'), (mass, mass))
+            
+        if keys_pressed[K_DOWN] and self.rect.bottom < 500:
+            self.speedY += self.accel
+            self.image = pygame.transform.scale(pygame.image.load('secco.png'), (mass, mass))
+
+        self.speedX *= self.friction
+        self.speedY *= self.friction
+
+        if self.speedX > self.maxspeed:
+            self.speedX = self.maxspeed
+        elif self.speedX < -self.maxspeed:
+            self.speedX = -self.maxspeed
+
+        self.rect.x += self.speedX
+        self.rect.y += self.speedY
+
+        self.rect.width = mass
+        self.rect.height = mass
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y, mass):
+        super().__init__()
+        self.mass = mass
+        self.image = pygame.transform.scale(pygame.image.load('secco.png'), (mass, mass))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+    def reset_pos(self):
+        self.rect.y = random.randrange(0, 600)
+        self.rect.x = -20
+
+    def Update(self):
+        self.rect.x += 2
+        if self.rect.x > 610:
+            self.reset_pos()
+        
+
+all_group = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
+playermass = 50
+player = Player(10, 10, playermass)
+enemy1 = Enemy(300, 300, 100)
+enemy2 = Enemy(100, 400, 10)
+
+for i in range(10):
+    enemy = Enemy(random.randint(100, 500),random.randint(100, 500),random.randint(10, 100) )
+    
+    all_group.add(enemy)
+    enemies.add(enemy)
+
+all_group.add(enemy1, enemy2, player)
+enemies.add(enemy1, enemy2)
+
+def colCheck(player, enemies):
+    collision_sprites = pygame.sprite.spritecollide(player, enemies, True)
+    for sprite in collision_sprites:
+        global playermass
+        if playermass > sprite.mass:
+            all_group.remove(sprite)
+            enemies.add(Enemy(random.randint(100, 500),random.randint(100, 500),random.randint(10, 100)))
+            playermass += 1
+        else:
+            all_group.remove(player)
+            all_group.add(sprite)
+            enemies.add(sprite)
+
+
+run = True
+while run:
+    pygame.time.delay(60)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+    if not enemies:
+        for i in range(10):
+            enemy = Enemy(random.randint(100, 500),random.randint(100, 500),random.randint(10, 50) )
+            
+            all_group.add(enemy)
+            enemies.add(enemy)
+
+    keys_pressed = pygame.key.get_pressed()
+    player.update(keys_pressed, playermass)
+    for enemy in enemies:
+        enemy.Update()
+    colCheck(player, enemies)
+
+    window.fill((255,255,255))
+    all_group.draw(window) 
+
+    pygame.display.update()
+pygame.quit()
