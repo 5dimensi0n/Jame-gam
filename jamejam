@@ -2,9 +2,6 @@ import pygame
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, QUIT, K_LSHIFT
 import random
 def game():
-   
-    
-
 
     pygame.init()
     lives = 3
@@ -12,18 +9,20 @@ def game():
     pygame.time.set_timer(pygame.USEREVENT, 1000)
     font = pygame.font.SysFont('Consolas', 30)
 
-    viruses = ['porcine.png','rabies.png', 'Mycoplasma.png', 'Mimivirus.png']
+    viruses = ['sprites/porcine.png','sprites/rabies.png', 'sprites/Mycoplasma.png', 'sprites/Mimivirus.png']
+    hearts = ['sprites/hearts/heartPorc.png', 'sprites/hearts/heartRabies.png', 'sprites/hearts/heartMyco.pmg', 'sprites/hearts/heartMimi.png']
     all_group = pygame.sprite.Group()
     enemies = pygame.sprite.Group()
+    lifegroup = pygame.sprite.Group()
     enemyIndex = 0
 
     class Player(pygame.sprite.Sprite):
         def __init__(self, x, y, mass):
             super().__init__()
-            self.image = pygame.transform.scale(pygame.image.load('player.png'), (mass, mass))
+            self.image = pygame.transform.scale(pygame.image.load('sprites/player.png'), (mass, mass))
             self.rect = self.image.get_rect()
             self.rect.topleft = (x,y)
-            self.accel = 2
+            self.accel = 1
             self.maxspeed = 20
             self.friction = 0.9
             self.speedX = 0
@@ -57,26 +56,27 @@ def game():
             self.rect.width = mass
             self.rect.height = mass
 
-            self.image = pygame.transform.scale(pygame.image.load('player.png'), (mass, mass))
+            self.image = pygame.transform.scale(pygame.image.load('sprites/player.png'), (mass, mass))
 
     class Enemy(pygame.sprite.Sprite):
         def __init__(self, x, y, mass, sprites, index):
             super().__init__()
             self.mass = mass
+            self.sprites = sprites
             self.image = pygame.transform.scale(pygame.image.load(sprites[0]), (mass, mass))
             self.rect = self.image.get_rect()
             self.rect.topleft = (x, y)
             self.index = index
 
         def reset_pos(self):
-            enemy = Enemy(-10 ,random.randint(0, 600),random.randint(playermass-50, playermass+25),viruses,enemyIndex )
+            enemy = Enemy(-10 ,random.randint(0, 500),random.randint(playermass-50, playermass+25),self.sprites,enemyIndex )
                             
             all_group.add(enemy)
             enemies.add(enemy)
             self.kill()
 
         def Update(self, sprites):
-            self.rect.x += 2
+            self.rect.x += 1
             if self.rect.x > 610:
                 self.reset_pos()
             self.image = pygame.transform.scale(pygame.image.load(sprites[self.index]), (self.mass, self.mass))
@@ -84,15 +84,17 @@ def game():
     playermass = 75
     player = Player(10, 10, playermass)
 
-    playerAlive = True
+    life = Enemy(random.randint(0, 450),random.randint(0, 450),100,hearts,enemyIndex)
 
-    for i in range(15):
-        enemy = Enemy(random.randint(0, 600),random.randint(0, 600),random.randint(playermass-50, playermass+5),viruses,enemyIndex)
+    for i in range(10):
+        enemy = Enemy(random.randint(0, 500),random.randint(0, 500),random.randint(playermass-50, playermass+5),viruses,enemyIndex)
         
         all_group.add(enemy)
         enemies.add(enemy)
 
-    all_group.add(player)
+
+    lifegroup.add(life)
+    all_group.add(player, life)
 
     def colCheck(player, enemies):
         nonlocal playermass
@@ -110,8 +112,23 @@ def game():
                 if lives < 0:
                     fateBAD()
 
+    def HeartCheck(player, lifegroup):
+        nonlocal lives
+        nonlocal playermass
+        collision_hearts = pygame.sprite.spritecollide(player, lifegroup, False)
+        for heart in collision_hearts:
+            if playermass > 55:
+                lives += 1
+                playermass -= 10
+                life.rect.x = random.randint(0, 450)
+                life.rect.y = random.randint(0, 450)
+                life.image = pygame.transform.scale(pygame.image.load(hearts[enemyIndex]), (100, 100))
+
     window = pygame.display.set_mode((500, 500))
     pygame.display.set_caption('thing')
+
+    icon = pygame.image.load('sprites/player.png') 
+    pygame.display.set_icon(icon)
 
     run = True
     while run:
@@ -120,7 +137,7 @@ def game():
         for event in pygame.event.get():
             if event.type == pygame.USEREVENT: 
                 counter -= 1
-                text = str(counter).rjust(3) if counter > 0 else 'boom!'
+                text = str(counter).rjust(3) if counter > 0 else 'go!'
             if event.type == pygame.QUIT:
                 run = False
 
@@ -131,6 +148,7 @@ def game():
             enemy.Update(viruses)
         if counter < 1:
             colCheck(player, enemies)
+            HeartCheck(player, lifegroup)
         if not enemies:
             for i in range(15):
                 enemy = Enemy(random.randint(0, 600),random.randint(0, 600),random.randint(playermass-50, playermass+5),viruses,enemyIndex)
@@ -171,7 +189,7 @@ def fateBAD():
     play = pygame.Rect(425, 200, 140, 50)
     quit = pygame.Rect(425, 400, 140, 50)
 
-    playtext = font.render("Play Again", True, (252, 251, 252))
+    playtext = font.render("Play", True, (252, 251, 252))
     quittext = font.render("Quit", True, (252, 251, 252))
 
     pygame.display.set_caption('Meow')
@@ -188,7 +206,7 @@ def fateBAD():
         
         mouse = pygame.mouse.get_pos() 
         window.fill((45,39,50))
-        window.blit(pygame.transform.scale((pygame.image.load('badend.png')), (600,600)), (0,0))
+        window.blit(pygame.transform.scale((pygame.image.load('sprites/badend.png')), (600,600)), (0,0))
         
 
         pygame.draw.rect(window, (150,219,143), play)
@@ -224,7 +242,7 @@ def fateGOOD():
         
         mouse = pygame.mouse.get_pos() 
         window.fill((45,39,50))
-        window.blit(pygame.transform.scale((pygame.image.load('goodend.png')), (600,600)), (0,0))
+        window.blit(pygame.transform.scale((pygame.image.load('sprites/goodend.png')), (600,600)), (0,0))
         
 
         pygame.draw.rect(window, (150,219,143), play)
@@ -234,3 +252,5 @@ def fateGOOD():
         window.blit(quittext, (450, 400))
         pygame.display.flip()   
     pygame.quit()
+
+    
