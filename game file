@@ -1,17 +1,18 @@
-
-import pygame
-from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, QUIT, K_LSHIFT
-import random
-playermass = 50
 def game():
-    pygame.init()
-    window = pygame.display.set_mode((500, 500))
-    pygame.display.set_caption('thing')
+    import pygame
+    from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, QUIT, K_LSHIFT
+    import random
 
+
+    pygame.init()
 
     counter, text = 5, '5'.rjust(3)
     pygame.time.set_timer(pygame.USEREVENT, 1000)
     font = pygame.font.SysFont('Consolas', 30)
+
+
+    all_group = pygame.sprite.Group()
+    enemies = pygame.sprite.Group()
 
     class Player(pygame.sprite.Sprite):
         def __init__(self, x, y, mass):
@@ -66,17 +67,17 @@ def game():
             self.rect.topleft = (x, y)
 
         def reset_pos(self):
-            self.rect.y = random.randrange(0, 600)
-            self.rect.x = -20
+            enemy = Enemy(-10 ,random.randint(0, 600),random.randint(playermass-50, playermass+50) )
+                            
+            all_group.add(enemy)
+            enemies.add(enemy)
+            self.kill()
 
         def Update(self):
             self.rect.x += 2
             if self.rect.x > 610:
                 self.reset_pos()
             
-
-    all_group = pygame.sprite.Group()
-    enemies = pygame.sprite.Group()
     playermass = 50
     player = Player(10, 10, playermass)
     enemy1 = Enemy(300, 300, 100)
@@ -85,7 +86,7 @@ def game():
     playerAlive = True
 
     for i in range(10):
-        enemy = Enemy(random.randint(0, 500),random.randint(0, 500),random.randint(10, 100) )
+        enemy = Enemy(random.randint(0, 600),random.randint(0, 600),random.randint(playermass-50, playermass+5) )
         
         all_group.add(enemy)
         enemies.add(enemy)
@@ -94,19 +95,23 @@ def game():
     enemies.add(enemy1, enemy2)
 
     def colCheck(player, enemies):
-        global playermass
-
+        nonlocal playermass
         collision_sprites = pygame.sprite.spritecollide(player, enemies, False)
         for sprite in collision_sprites:
             if playermass > sprite.mass:
                 
                 sprite.reset_pos()
-                playermass += sprite.mass*0.1
+                playermass += 10
+                player.image = pygame.transform.scale(player.image, (playermass, playermass))
             else:
-                player.image = pygame.transform.scale(pygame.image.load('explosion.png'), (100, 100))
+                pass
+
+    window = pygame.display.set_mode((500, 500))
+    pygame.display.set_caption('thing')
+
     run = True
     while run:
-        pygame.time.delay(10)
+        pygame.time.delay(30)
 
         for event in pygame.event.get():
             if event.type == pygame.USEREVENT: 
@@ -114,13 +119,6 @@ def game():
                 text = str(counter).rjust(3) if counter > 0 else 'boom!'
             if event.type == pygame.QUIT:
                 run = False
-                
-        if not enemies:
-            for i in range(10):
-                enemy = Enemy(random.randint(100, 500),random.randint(100, 500),random.randint(10, 50) )
-                
-                all_group.add(enemy)
-                enemies.add(enemy)
 
         keys_pressed = pygame.key.get_pressed()
         
@@ -131,9 +129,9 @@ def game():
             colCheck(player, enemies)
 
         match playermass:
-            case n if n < 400:
+            case n if n < 150:
                 pass
-            case n if n > 400:
+            case n if n > 150:
                 counter = 5
                 playermass = 50
 
