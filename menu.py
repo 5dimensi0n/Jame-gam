@@ -1,16 +1,18 @@
+import pygame
+from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, QUIT, K_LSHIFT
+import random
 def game():
-    import pygame
-    from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, QUIT, K_LSHIFT
-    import random
+   
+    
 
 
     pygame.init()
-
+    lives = 3
     counter, text = 5, '5'.rjust(3)
     pygame.time.set_timer(pygame.USEREVENT, 1000)
     font = pygame.font.SysFont('Consolas', 30)
 
-    viruses = ['Mycoplasma.png', 'secco.png', 'Mimivirus.png']
+    viruses = ['porcine.png','rabies.png', 'Mycoplasma.png', 'Mimivirus.png']
     all_group = pygame.sprite.Group()
     enemies = pygame.sprite.Group()
     enemyIndex = 0
@@ -18,7 +20,7 @@ def game():
     class Player(pygame.sprite.Sprite):
         def __init__(self, x, y, mass):
             super().__init__()
-            self.image = pygame.transform.scale(pygame.image.load('macrophage.png'), (mass, mass))
+            self.image = pygame.transform.scale(pygame.image.load('player.png'), (mass, mass))
             self.rect = self.image.get_rect()
             self.rect.topleft = (x,y)
             self.accel = 2
@@ -55,7 +57,7 @@ def game():
             self.rect.width = mass
             self.rect.height = mass
 
-            self.image = pygame.transform.scale(pygame.image.load('macrophage.png'), (mass, mass))
+            self.image = pygame.transform.scale(pygame.image.load('player.png'), (mass, mass))
 
     class Enemy(pygame.sprite.Sprite):
         def __init__(self, x, y, mass, sprites, index):
@@ -67,7 +69,7 @@ def game():
             self.index = index
 
         def reset_pos(self):
-            enemy = Enemy(-10 ,random.randint(0, 600),random.randint(playermass-50, playermass+50),viruses,enemyIndex )
+            enemy = Enemy(-10 ,random.randint(0, 600),random.randint(playermass-50, playermass+25),viruses,enemyIndex )
                             
             all_group.add(enemy)
             enemies.add(enemy)
@@ -79,7 +81,7 @@ def game():
                 self.reset_pos()
             self.image = pygame.transform.scale(pygame.image.load(sprites[self.index]), (self.mass, self.mass))
             
-    playermass = 50
+    playermass = 75
     player = Player(10, 10, playermass)
 
     playerAlive = True
@@ -94,22 +96,26 @@ def game():
 
     def colCheck(player, enemies):
         nonlocal playermass
+        nonlocal lives
         collision_sprites = pygame.sprite.spritecollide(player, enemies, False)
         for sprite in collision_sprites:
-            if playermass > sprite.mass:
+            if playermass >= sprite.mass:
                 
                 sprite.reset_pos()
-                playermass += 10
+                playermass += 5
                 player.image = pygame.transform.scale(player.image, (playermass, playermass))
-            else:
-                pass
+            elif playermass < sprite.mass:
+                sprite.reset_pos()
+                lives-= 1
+                if lives < 0:
+                    fateBAD()
 
     window = pygame.display.set_mode((500, 500))
     pygame.display.set_caption('thing')
 
     run = True
     while run:
-        pygame.time.delay(30)
+        pygame.time.delay(0)
 
         for event in pygame.event.get():
             if event.type == pygame.USEREVENT: 
@@ -142,11 +148,89 @@ def game():
                 for enemy in enemies:
                     enemies.remove(enemy)
                     all_group.remove(enemy)
-                enemyIndex += 1
+                if enemyIndex == len(viruses)-1:
+                    fateGOOD()
+                    enemyIndex = 0
+                else:
+                    enemyIndex += 1
 
         window.fill((45,39,50))
         all_group.draw(window) 
-        window.blit(font.render(text, True, (0, 0, 0)), (32, 48))
+        window.blit(font.render(text, True, (252, 251, 252)), (32, 48))
+        window.blit(font.render(f"lives: {lives}", True, (252, 251, 252)), (300, 48))
 
         pygame.display.update()
+    pygame.quit()
+
+
+def fateBAD():
+    pygame.init()
+    font = pygame.font.SysFont("Consolas", 30)
+
+    window = pygame.display.set_mode((600, 600))
+    play = pygame.Rect(425, 200, 140, 50)
+    quit = pygame.Rect(425, 400, 140, 50)
+
+    playtext = font.render("Play Again", True, (252, 251, 252))
+    quittext = font.render("Quit", True, (252, 251, 252))
+
+    pygame.display.set_caption('Meow')
+    run = True
+    while run:
+        for event in pygame.event.get():  
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if play.collidepoint(mouse):
+                    game()
+                if quit.collidepoint(mouse):
+                    run = False
+        
+        mouse = pygame.mouse.get_pos() 
+        window.fill((45,39,50))
+        window.blit(pygame.transform.scale((pygame.image.load('badend.png')), (600,600)), (0,0))
+        
+
+        pygame.draw.rect(window, (150,219,143), play)
+        pygame.draw.rect(window, (150,219,143), quit)
+
+        window.blit(playtext, (450, 200))
+        window.blit(quittext, (450, 400))
+        pygame.display.flip()   
+    pygame.quit()
+
+def fateGOOD():
+    pygame.init()
+    font = pygame.font.SysFont("Consolas", 30)
+    
+    window = pygame.display.set_mode((600, 600))
+    play = pygame.Rect(425, 200, 140, 50)
+    quit = pygame.Rect(425, 400, 140, 50)
+
+    playtext = font.render("Play", True, (252, 251, 252))
+    quittext = font.render("Quit", True, (252, 251, 252))
+
+    pygame.display.set_caption('Meow')
+    run = True
+    while run:
+        for event in pygame.event.get():  
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if play.collidepoint(mouse):
+                    game()
+                if quit.collidepoint(mouse):
+                    run = False
+        
+        mouse = pygame.mouse.get_pos() 
+        window.fill((45,39,50))
+        window.blit(pygame.transform.scale((pygame.image.load('goodend.png')), (600,600)), (0,0))
+        
+
+        pygame.draw.rect(window, (150,219,143), play)
+        pygame.draw.rect(window, (150,219,143), quit)
+
+        window.blit(playtext, (450, 200))
+        window.blit(quittext, (450, 400))
+        pygame.display.flip()   
     pygame.quit()
