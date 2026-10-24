@@ -1,6 +1,6 @@
 
 import pygame
-import jamejam
+from jamejam import *
 
 pygame.init()
 font = pygame.font.SysFont("Consolas", 30)
@@ -20,8 +20,7 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if play.collidepoint(mouse):
-                jamejam.game()
-
+                game()
             if quit.collidepoint(mouse):
                 run = False
     
