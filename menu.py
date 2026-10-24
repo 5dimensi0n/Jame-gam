@@ -1,6 +1,7 @@
 
 import pygame
 from jamejam import *
+import math
 
 pygame.init()
 font = pygame.font.SysFont("Consolas", 30)
@@ -26,7 +27,8 @@ while run:
     
     mouse = pygame.mouse.get_pos() 
     window.fill((45,39,50))
-    
+    t = pygame.time.get_ticks() / 2 % -750
+    window.blit(pygame.transform.scale((pygame.image.load('player.png')), (600,(math.sin(t/240.0) * 20 + 600))), (0,-math.sin(t/240.0) * 25 - 20))
 
     pygame.draw.rect(window, (150,219,143), play)
     pygame.draw.rect(window, (150,219,143), quit)
