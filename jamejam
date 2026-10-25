@@ -9,8 +9,8 @@ def game():
     pygame.time.set_timer(pygame.USEREVENT, 1000)
     font = pygame.font.SysFont('Consolas', 30)
 
-    viruses = ['sprites/porcine.png','sprites/rabies.png', 'sprites/Mycoplasma.png', 'sprites/Mimivirus.png']
-    hearts = ['sprites/hearts/heartPorc.png', 'sprites/hearts/heartRabies.png', 'sprites/hearts/heartMyco.pmg', 'sprites/hearts/heartMimi.png']
+    viruses = ['sprites/porcine.png', 'sprites/Papillomavirus.png','sprites/rabies.png', 'sprites/Mycoplasma.png', 'sprites/Mimivirus.png']
+    hearts = ['sprites/hearts/heartPorc.png','sprites/hearts/heart.png', 'sprites/hearts/heartRabies.png', 'sprites/hearts/heartMyco.png', 'sprites/hearts/heartMimi.png']
     all_group = pygame.sprite.Group()
     enemies = pygame.sprite.Group()
     lifegroup = pygame.sprite.Group()
@@ -252,7 +252,7 @@ def fateGOOD():
         
         mouse = pygame.mouse.get_pos() 
         window.fill((45,39,50))
-        window.blit(pygame.transform.scale((pygame.image.load('sprites/goodend.png')), (600,600)), (0,0))
+        window.blit(pygame.transform.scale((pygame.image.load('sprites/Goodend.png')), (600,600)), (0,0))
         
 
         pygame.draw.rect(window, (150,219,143), play)
