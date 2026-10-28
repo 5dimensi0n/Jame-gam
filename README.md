@@ -1,3 +1,5 @@
+A game about being a virus and eating other viruses! Become the biggest virus of them all
+
 The game was made using VsCode and pygame.
 To excecute the raw files you need to have python and pygame installed but i packaged it all into an exe file for easier execution
 The exe file can be found in a zip folder here because i couldnt add an exe file to rhe repository-> https://kirbuke.itch.io/virus
