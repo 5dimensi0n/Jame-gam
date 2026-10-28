@@ -3,5 +3,5 @@ To excecute the raw files you need to have python and pygame installed but i pac
 The exe file can be found in a zip folder here because i couldnt add an exe file to rhe repository-> https://kirbuke.itch.io/virus
 
 No AI was used, though i did use some tutorials to reference some of the logic behind the code
-To find the sprites for the game go to the sprites branch. I am bad at using github so i apologise for the mess, i couldnt find a good tutorial.
+To find the sprites and audio for the game go to the sprites branch. I am bad at using github so i apologise for the mess, i couldnt find a good tutorial.
 
